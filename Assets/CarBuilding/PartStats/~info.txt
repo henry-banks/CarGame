@@ -1,0 +1,12 @@
+gonna put down the layouts for everything here.
+should probably switch to JSON because it's got Unity integration and is an actual config format
+
+NAME IS ALWAYS THE FIRST LINE.
+
+WHEEL: Edits most properties in the WheelCollider
+mass (float 1-100)
+Wheel Damping Rate (damps the wheel) (float 0-1 default 0.01)
+Suspension Distance (....?) (float 0-1)
+Force App Point Distance (some kinda acceleration thing??) (float 0-1)
+forward stiffness (acceleration, higher numbers make it unstable) (int/float 1+)
+sideways stiffness (turning something??) (int/float 1+)
