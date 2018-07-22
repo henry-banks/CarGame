@@ -24,9 +24,32 @@ public class CustomCarController : MonoBehaviour {
     public float maxSteeringAngle; //maximum steer angle
     public float brakeForce = 100; //brake force
     public float brakeBias = .8f; //lerp alpha
+    public float impulseStrength = 10f; //force of impulses like ROCKETS
+    public Vector3 impulse; //used to push the car with a single forceful impulse
+    public float groundDistThreshold = 0.1f; //used to check if we are touching the ground
+
+    //Properties
+
+    //https://answers.unity.com/questions/17968/finding-the-bounds-of-a-grouped-model.html
+    public float distToGround { get {
+            Bounds combinedBounds;
+            var renderers = GetComponentsInChildren<Renderer>();
+            combinedBounds = renderers[0].bounds;
+            foreach (Renderer render in renderers)
+            {
+                //Skip the first
+                if(render != renderers[0])combinedBounds.Encapsulate(render.bounds);
+            }
+            return combinedBounds.extents.y;
+        } }
+    public Rigidbody rb;
+    bool canJump;
 
     public void Start()
     {
+        //Initialize component variables
+        rb = GetComponent<Rigidbody>();
+
         //Is there a better way to do this?
         allParts.Add(body);
         allParts.Add(chassis);
@@ -65,18 +88,47 @@ public class CustomCarController : MonoBehaviour {
         visualWheel.transform.Rotate(0, 0, 90);
     }
 
+    private void Update()
+    {
+        float jump = Input.GetAxis("Jump");
+
+        //Reset canJump if the jump button is depressed.
+        if (jump <= 0 && !canJump) canJump = true;
+    }
+
     private void FixedUpdate()
     {
         float motor = maxMotorTorque * Input.GetAxis("Vertical");
         float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
-        float handbrake = Input.GetAxis("Jump");
+        float handbrake = Input.GetAxis("Brake");
+        float jump = Input.GetAxis("Jump");
 
+        BrakeInput(handbrake, ref motor);
+        JumpInput(jump);
+
+        WheelInput(motor, steering);
+    }
+
+    //Update functions
+    void BrakeInput(float handbrake, ref float motor)
+    {
         if (handbrake > 0)
         {
             motor = 0;
             GetComponent<Rigidbody>().velocity = Vector3.Lerp(GetComponent<Rigidbody>().velocity, Vector3.zero, 0.2f);
         }
-
+    }
+    void JumpInput(float jump)
+    {
+        if(IsOnGround() && jump > 0 && canJump)
+        {
+            canJump = false;
+            impulse = new Vector3(0, impulseStrength, 0);
+            ApplyImpulse();
+        }
+    }
+    void WheelInput(float motor, float steering)
+    {
         foreach (AxleInfo a in axels)
         {
             if (a.steering)
@@ -84,7 +136,7 @@ public class CustomCarController : MonoBehaviour {
                 a.leftWheel.steerAngle = steering;
                 a.rightWheel.steerAngle = steering;
             }
-            if (a.motor)
+            if (a.motor && IsOnGround())
             {
                 a.leftWheel.motorTorque = motor;
                 a.rightWheel.motorTorque = motor;
@@ -92,6 +144,18 @@ public class CustomCarController : MonoBehaviour {
             ApplyLocalPositionToVisuals(a.leftWheel);
             ApplyLocalPositionToVisuals(a.rightWheel);
         }
+    }
+
+    //Returns true if we are on the ground
+    bool IsOnGround()
+    {   return Physics.Raycast(transform.position, -Vector3.up, distToGround + groundDistThreshold);    }
+
+    //Applies the current impulse to the car and resets it
+    void ApplyImpulse()
+    {
+        rb.AddForce(impulse, ForceMode.Impulse);
+        impulse = Vector3.zero;
+        Debug.Log("Jump!");
     }
 
     //Delay the building of the car so that the car parts are initialized.
