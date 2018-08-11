@@ -20,6 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4641851137455150}
   - component: {fileID: 114945253085002236}
+  - component: {fileID: 114450561979405948}
   m_Layer: 0
   m_Name: BasicWheel
   m_TagString: Untagged
@@ -40,6 +41,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114450561979405948
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1203610730212420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f35a52a64a250146a80c971b308d2ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explosion: {fileID: 1287098453143860, guid: bf34d08c0e0d8294b8e859aef52be6d0, type: 2}
+  health: 0
+  hitThreshold: 10000
 --- !u!114 &114945253085002236
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -57,7 +72,7 @@ MonoBehaviour:
   car: {fileID: 0}
   partName: Basic Wheel
   mass: 20
-  dampRate: 0.02
+  dampRate: 1
   suspensionDist: 0.5
   FAPD: 0.5
   fStiff: 5
